@@ -1,19 +1,25 @@
 
+
+
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import MainPage from 'D:\\School\\2ndY_S2\\MPP\\battlepass\\src\\pages\\MainPage.jsx';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Events from '../src/pages/Events.jsx'
+import EventDetail from '../src/pages/EventDetail.jsx';
+import './App.css';
+import MainPage from 'D:\\School\\2ndY_S2\\MPP\\battlepass\\src\\pages\\MainPage.jsx';
+
 
 function App() {
     return (
-        <Router>
+        <BrowserRouter>
             <Routes>
                 <Route path="/" element={<MainPage />} />
                 <Route path="/events" element={<Events />} />
+                <Route path="/event/:eventSlug" element={<EventDetail />} />
+                <Route path="/" element={<Navigate to="/events" replace />} />
             </Routes>
-        </Router>
+        </BrowserRouter>
     );
 }
-//mor de nervi ma duc sa mi iau tigari
 
 export default App;
