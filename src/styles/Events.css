@@ -1,0 +1,119 @@
+body {
+    background-color: #300;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.main-container {
+    background-color: #fff;
+    margin: 20px auto;
+    padding: 20px;
+    max-width: 1200px;
+    border-radius: 8px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 10px 20px;
+    border-bottom: 5px solid blue;
+}
+
+.header nav a {
+    margin: 0 10px;
+    text-decoration: none;
+    color: black;
+}
+
+.header-button {
+    background: black;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.content-container {
+    display: flex;
+    margin-top: 20px;
+}
+
+.sidebar {
+    width: 250px;
+    padding: 10px;
+    background: #f9f9f9;
+}
+
+.search-box {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+.filters {
+    display: flex;
+    flex-direction: column;
+}
+
+.event-list {
+    flex: 1;
+    padding: 20px;
+}
+
+.event-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #eee;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.event-info {
+    flex: 1;
+}
+
+.event-button {
+    background: #ddd;
+    border: none;
+    padding: 5px 10px;
+}
+
+.event-image {
+    width: 100px;
+    height: 100px;
+    background: #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pagination {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.page-button {
+    border: none;
+    background: #ddd;
+    padding: 5px 10px;
+    margin: 2px;
+    cursor: pointer;
+}
+
+.footer {
+    background: #300;
+    padding: 20px;
+    color: white;
+    text-align: center;
+}
+
+.footer-image {
+    background: gray;
+    height: 100px;
+    margin-top: 10px;
+}
