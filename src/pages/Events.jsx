@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/Events.css";
 import concerts from '../In_memory_storage/Concerts.js';
 import { genresList, orderByOptions, countries, cities } from '../In_memory_storage/Filters.js';
 
 const Events = () => {
+    const navigate = useNavigate();
     const concertsPerPage = 3;
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedGenres, setSelectedGenres] = useState([]);
@@ -23,6 +25,17 @@ const Events = () => {
             }
         }
         return null;
+    };
+
+    // Helper function to create URL-friendly slugs from event names
+    const createSlug = (name) => {
+        return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    };
+
+    // Function to handle navigation to event detail page
+    const navigateToEventDetail = (concert) => {
+        const eventSlug = createSlug(concert.name);
+        navigate(`/event/${eventSlug}`, { state: { concert } });
     };
 
     // Apply filters whenever any filter changes
@@ -223,7 +236,12 @@ const Events = () => {
                                         <p>Ticket Price - {concert.price}</p>
                                         <p>Location - {concert.location}</p>
                                         <p>Date - {concert.date}</p>
-                                        <button className="event-button">See more info</button>
+                                        <button
+                                            className="event-button"
+                                            onClick={() => navigateToEventDetail(concert)}
+                                        >
+                                            See more info
+                                        </button>
                                     </div>
                                     <img src={concert.imageUrl} alt={concert.name} className="event-image" />
                                 </div>
