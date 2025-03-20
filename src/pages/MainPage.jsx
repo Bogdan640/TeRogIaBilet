@@ -6,6 +6,7 @@ import images from 'D:\\School\\2ndY_S2\\MPP\\battlepass\\src\\assets\\MainPageI
 import last from 'D:\\School\\2ndY_S2\\MPP\\battlepass\\src\\assets\\MainPageImages\\last.webp';
 import metal from 'D:\\School\\2ndY_S2\\MPP\\battlepass\\src\\assets\\MainPageImages\\metal1.jpg';
 
+
 function MainPage() {
 
     const navigate = useNavigate();
@@ -17,7 +18,7 @@ function MainPage() {
                     <a href="#">Q&A</a>
                     <a href="#">INFO</a>
                     <a href="#">CONTACT</a>
-                    <a href="#">SIGN IN</a>
+                    <a onClick={() => navigate("/signin")} style={{cursor: 'pointer'}}>SIGN IN</a>
                 </header>
 
                 <section className="startup_zone">

@@ -7,6 +7,8 @@ import Events from '../src/pages/Events.jsx'
 import EventDetail from '../src/pages/EventDetail.jsx';
 import './App.css';
 import MainPage from 'D:\\School\\2ndY_S2\\MPP\\battlepass\\src\\pages\\MainPage.jsx';
+import SignIn from "./pages/SignIn.jsx";
+import AdminPage from "./pages/AdminPage.jsx";
 
 
 function App() {
@@ -17,6 +19,8 @@ function App() {
                 <Route path="/events" element={<Events />} />
                 <Route path="/event/:eventSlug" element={<EventDetail />} />
                 <Route path="/" element={<Navigate to="/events" replace />} />
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/admin" element={<AdminPage />} />
             </Routes>
         </BrowserRouter>
     );
