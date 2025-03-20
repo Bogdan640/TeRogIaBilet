@@ -1,0 +1,202 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    color: #fff;
+    background-color: black;
+}
+
+body {
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.dashboard-admin-page {
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 1000px;
+    margin: 0 auto;
+    background-color: #3C0000;
+    position: relative;
+    min-height: 100vh;
+    padding-bottom: 40px;
+}
+
+.dashboard-admin-header {
+    background-color: #200000;
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+.dashboard-admin-header h1 {
+    margin: 0;
+    font-size: 30px;
+    color: #fff;
+}
+
+.dashboard-logout-button {
+    background-color: transparent;
+    border: 2px solid #fff;
+    color: #fff;
+    padding: 8px 16px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dashboard-logout-button:hover {
+    background-color: #fff;
+    color: #3C0000;
+}
+
+.dashboard-content-container {
+    display: flex;
+    padding: 30px;
+    gap: 30px;
+}
+
+.dashboard-form-section {
+    flex: 1;
+    background-color: #290000;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.dashboard-listing-section {
+    flex: 1;
+    background-color: #290000;
+    padding: 20px;
+    border-radius: 5px;
+    max-height: 800px;
+    overflow-y: auto;
+}
+
+.dashboard-form-section h2,
+.dashboard-listing-section h2 {
+    color: #fff;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.dashboard-event-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.dashboard-form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.dashboard-form-group label {
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.dashboard-form-group input,
+.dashboard-form-group select {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #500000;
+    background-color: #111;
+    color: #fff;
+    border-radius: 3px;
+}
+
+.dashboard-create-button {
+    background-color: #600000;
+    color: white;
+    border: none;
+    padding: 12px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+.dashboard-create-button:hover {
+    background-color: #800000;
+}
+
+.dashboard-success-message {
+    background-color: rgba(0, 128, 0, 0.2);
+    border: 1px solid #006400;
+    color: #00FF00;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 3px;
+}
+
+.dashboard-events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.dashboard-event-item {
+    display: flex;
+    background-color: #400000;
+    border-radius: 5px;
+    overflow: hidden;
+    height: 120px;
+}
+
+.dashboard-event-thumbnail {
+    width: 120px;
+    min-width: 120px;
+    height: 120px;
+    overflow: hidden;
+}
+
+.dashboard-event-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.dashboard-event-info {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-event-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+}
+
+.dashboard-event-info p {
+    margin: 2px 0;
+    font-size: 14px;
+}
+
+.error-input {
+    border-color: #ff0000 !important;
+    background-color: rgba(255, 0, 0, 0.05) !important;
+}
+
+.error-message {
+    color: #ff6b6b;
+    font-size: 14px;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+/*@media (max-width: 768px) {*/
+/*    .dashboard-content-container {*/
+/*        flex-direction: column;*/
+/*    }*/
+
+/*    .dashboard-admin-page {*/
+/*        max-width: 100%;*/
+/*    }*/
+/*}*/
