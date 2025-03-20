@@ -16,6 +16,12 @@ function AdminPage() {
         imageUrl: ''
     });
 
+    // State for tracking selected event
+    const [selectedEvent, setSelectedEvent] = useState(null);
+
+    // State for tracking edit mode
+    const [isEditMode, setIsEditMode] = useState(false);
+
     // State for validation errors
     const [errors, setErrors] = useState({});
 
@@ -91,20 +97,27 @@ function AdminPage() {
         e.preventDefault();
 
         if (validateForm()) {
-            // Generate a new ID based on the highest existing ID
-            const newId = Math.max(...concerts.map(concert => concert.id)) + 1;
-
-            // Create new event object
-            const eventToAdd = {
-                id: newId,
-                ...newEvent
-            };
-
-            // Add to concerts array (in a real app, this would be an API call)
-            concerts.push(eventToAdd);
-
-            // Show success message
-            setSuccessMessage(`Event "${newEvent.name}" has been added successfully!`);
+            if (isEditMode && selectedEvent) {
+                // Update existing event
+                const eventIndex = concerts.findIndex(concert => concert.id === selectedEvent.id);
+                if (eventIndex !== -1) {
+                    concerts[eventIndex] = {
+                        ...concerts[eventIndex],
+                        ...newEvent
+                    };
+                    setSuccessMessage(`Event "${newEvent.name}" has been updated successfully!`);
+                }
+                setIsEditMode(false);
+            } else {
+                // Add new event
+                const newId = Math.max(...concerts.map(concert => concert.id), 0) + 1;
+                const eventToAdd = {
+                    id: newId,
+                    ...newEvent
+                };
+                concerts.push(eventToAdd);
+                setSuccessMessage(`Event "${newEvent.name}" has been added successfully!`);
+            }
 
             // Reset form
             setNewEvent({
@@ -116,10 +129,74 @@ function AdminPage() {
                 imageUrl: ''
             });
 
+            // Reset selected event
+            setSelectedEvent(null);
+
             // Clear success message after 3 seconds
             setTimeout(() => {
                 setSuccessMessage('');
             }, 3000);
+        }
+    };
+
+    // Handle event selection
+    const handleEventSelect = (concert) => {
+        if (selectedEvent && selectedEvent.id === concert.id) {
+            // Deselect if already selected
+            setSelectedEvent(null);
+        } else {
+            // Select new event
+            setSelectedEvent(concert);
+        }
+    };
+
+    // Handle edit button click
+    const handleEditClick = () => {
+        if (selectedEvent) {
+            setNewEvent({
+                name: selectedEvent.name,
+                genre: selectedEvent.genre,
+                price: selectedEvent.price,
+                location: selectedEvent.location,
+                date: selectedEvent.date,
+                imageUrl: selectedEvent.imageUrl
+            });
+            setIsEditMode(true);
+            // Scroll to form
+            document.querySelector('.dashboard-form-section').scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
+    // Handle cancel edit
+    const handleCancelEdit = () => {
+        setNewEvent({
+            name: '',
+            genre: '',
+            price: '',
+            location: '',
+            date: '',
+            imageUrl: ''
+        });
+        setIsEditMode(false);
+        setSelectedEvent(null);
+        setErrors({});
+    };
+
+    // Handle remove event
+    const handleRemoveEvent = () => {
+        if (selectedEvent) {
+            const eventIndex = concerts.findIndex(concert => concert.id === selectedEvent.id);
+            if (eventIndex !== -1) {
+                const eventName = concerts[eventIndex].name;
+                concerts.splice(eventIndex, 1);
+                setSuccessMessage(`Event "${eventName}" has been removed successfully!`);
+                setSelectedEvent(null);
+
+                // Clear success message after 3 seconds
+                setTimeout(() => {
+                    setSuccessMessage('');
+                }, 3000);
+            }
         }
     };
 
@@ -137,7 +214,7 @@ function AdminPage() {
 
             <div className="dashboard-content-container">
                 <div className="dashboard-form-section">
-                    <h2>Create New Event</h2>
+                    <h2>{isEditMode ? 'Update Event' : 'Create New Event'}</h2>
 
                     {successMessage && (
                         <div className="dashboard-success-message">{successMessage}</div>
@@ -235,15 +312,52 @@ function AdminPage() {
                             {errors.imageUrl && <div className="error-message">{errors.imageUrl}</div>}
                         </div>
 
-                        <button type="submit" className="dashboard-create-button">Create Event</button>
+                        <div className="dashboard-form-buttons">
+                            <button type="submit" className="dashboard-create-button">
+                                {isEditMode ? 'Update Event' : 'Create Event'}
+                            </button>
+                            {isEditMode && (
+                                <button
+                                    type="button"
+                                    className="dashboard-cancel-button"
+                                    onClick={handleCancelEdit}
+                                >
+                                    Cancel
+                                </button>
+                            )}
+                        </div>
                     </form>
                 </div>
 
                 <div className="dashboard-listing-section">
                     <h2>Current Events ({concerts.length})</h2>
+
+                    {concerts.length > 0 && (
+                        <div className="dashboard-action-buttons">
+                            <button
+                                onClick={handleEditClick}
+                                disabled={!selectedEvent}
+                                className={`dashboard-edit-button ${!selectedEvent ? 'dashboard-button-disabled' : ''}`}
+                            >
+                                Edit Selected
+                            </button>
+                            <button
+                                onClick={handleRemoveEvent}
+                                disabled={!selectedEvent}
+                                className={`dashboard-remove-button ${!selectedEvent ? 'dashboard-button-disabled' : ''}`}
+                            >
+                                Remove Selected
+                            </button>
+                        </div>
+                    )}
+
                     <div className="dashboard-events-list">
                         {concerts.map(concert => (
-                            <div key={concert.id} className="dashboard-event-item">
+                            <div
+                                key={concert.id}
+                                className={`dashboard-event-item ${selectedEvent && selectedEvent.id === concert.id ? 'dashboard-event-selected' : ''}`}
+                                onClick={() => handleEventSelect(concert)}
+                            >
                                 <div className="dashboard-event-thumbnail">
                                     <img src={concert.imageUrl} alt={concert.name} />
                                 </div>

@@ -77,6 +77,8 @@ body {
     overflow-y: auto;
 }
 
+
+
 .dashboard-form-section h2,
 .dashboard-listing-section h2 {
     color: #fff;
@@ -140,14 +142,37 @@ body {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    overflow-y: auto;
+    flex-grow: 1;
 }
 
+
+/*.dashboard-events-list {*/
+/*    display: flex;*/
+/*    flex-direction: column;*/
+/*    gap: 15px;*/
+/*}*/
 .dashboard-event-item {
     display: flex;
     background-color: #400000;
     border-radius: 5px;
     overflow: hidden;
     height: 120px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    position: relative;
+}
+
+.dashboard-event-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dashboard-event-selected {
+    background-color: #600000;
+    outline: 2px solid #ff9900;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .dashboard-event-thumbnail {
@@ -189,6 +214,73 @@ body {
     font-size: 14px;
     margin-top: 5px;
     font-weight: 500;
+}
+
+.dashboard-action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    position: sticky;
+    top: 0; /
+}
+
+/*.dashboard-action-buttons {*/
+/*    display: flex;*/
+/*    gap: 10px;*/
+/*    margin-bottom: 15px;*/
+/*}*/
+
+.dashboard-edit-button,
+.dashboard-remove-button,
+.dashboard-cancel-button {
+    padding: 8px 16px;
+    font-size: 16px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dashboard-edit-button {
+    background-color: #004080;
+    color: white;
+}
+
+.dashboard-edit-button:hover {
+    background-color: #0060bf;
+}
+
+.dashboard-remove-button {
+    background-color: #800000;
+    color: white;
+}
+
+.dashboard-remove-button:hover {
+    background-color: #a00000;
+}
+
+.dashboard-cancel-button {
+    background-color: #333;
+    color: white;
+}
+
+.dashboard-cancel-button:hover {
+    background-color: #444;
+}
+
+.dashboard-button-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.dashboard-button-disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.dashboard-form-buttons {
+    display: flex;
+    gap: 10px;
 }
 
 /*@media (max-width: 768px) {*/
