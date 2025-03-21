@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from "react-router-dom";
 import '../styles/AdminPage.css';
 import concerts from '../In_memory_storage/Concerts.js'; // Import your concerts data
 

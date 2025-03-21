@@ -18,7 +18,6 @@ function SignIn() {
             console.log('Admin login successful');
             navigate('/admin'); // Redirect to admin page
         } else {
-            // Handle regular user login or show error
             console.log('Login attempt with:', email, password);
             setError('Invalid email or password');
         }

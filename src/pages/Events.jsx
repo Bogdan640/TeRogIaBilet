@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "../styles/Events.css";
 import concerts from '../In_memory_storage/Concerts.js';
 import { genresList, orderByOptions, countries, cities } from '../In_memory_storage/Filters.js';
@@ -73,11 +73,11 @@ const Events = () => {
     const getButtonColorClass = (price) => {
         const numericPrice = parseFloat(price.replace('$', ''));
         if (numericPrice <= priceThresholds.low) {
-            return "event-button-low"; // Green
+            return "event-button-low";
         } else if (numericPrice <= priceThresholds.medium) {
-            return "event-button-medium"; // Yellow
+            return "event-button-medium";
         } else {
-            return "event-button-high"; // Red
+            return "event-button-high";
         }
     };
 

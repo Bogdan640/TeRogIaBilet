@@ -38,7 +38,7 @@ header {
 }
 
 header a {
-    color: #3C0000; /* Changed text color to white */
+    color: #3C0000;
     text-decoration: none;
     margin-left: 20px;
     font-size: 30px;

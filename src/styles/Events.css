@@ -288,7 +288,7 @@
     }
 
     .event-button-low {
-        background: #4CAF50 !important; /* Green */
+        background: #4CAF50 !important;
         border: none;
         padding: 8px 12px;
         border-radius: 5px;
@@ -298,7 +298,7 @@
     }
 
     .event-button-medium {
-        background: #FFD700 !important; /* Yellow */
+        background: #FFD700 !important;
         border: none;
         padding: 8px 12px;
         border-radius: 5px;
@@ -308,7 +308,7 @@
     }
 
     .event-button-high {
-        background: #FF5252 !important; /* Red */
+        background: #FF5252 !important;
         border: none;
         padding: 8px 12px;
         border-radius: 5px;
@@ -364,7 +364,7 @@
 
 
     .event-button-low {
-        background: #4CAF50 !important; /* Green */
+        background: #4CAF50 !important;
         border: none;
         padding: 8px 12px;
         border-radius: 5px;
@@ -374,7 +374,7 @@
     }
 
     .event-button-medium {
-        background: #FFD700 !important; /* Yellow */
+        background: #FFD700 !important;
         border: none;
         padding: 8px 12px;
         border-radius: 5px;
@@ -384,7 +384,7 @@
     }
 
     .event-button-high {
-        background: #FF5252 !important; /* Red */
+        background: #FF5252 !important;
         border: none;
         padding: 8px 12px;
         border-radius: 5px;
