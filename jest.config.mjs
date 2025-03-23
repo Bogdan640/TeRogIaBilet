@@ -1,7 +1,7 @@
 // jest.config.mjs - ESM syntax
 export default {
     testEnvironment: 'jsdom',
-    setupFilesAfterEnv: ['@testing-library/jest-dom'],
+    setupFilesAfterEnv: ['@testing-library/jest-dom', './jest.setup.js'],
     transform: {
         '^.+\\.jsx?$': 'babel-jest'
     },

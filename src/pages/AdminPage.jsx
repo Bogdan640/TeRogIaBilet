@@ -313,7 +313,9 @@ function AdminPage() {
                         </div>
 
                         <div className="dashboard-form-buttons">
-                            <button type="submit" className="dashboard-create-button">
+                            <button type="submit"
+                                    className="dashboard-create-button"
+                                    data-testid={isEditMode ? "update-event-button" : "create-event-button"}>
                                 {isEditMode ? 'Update Event' : 'Create Event'}
                             </button>
                             {isEditMode && (
