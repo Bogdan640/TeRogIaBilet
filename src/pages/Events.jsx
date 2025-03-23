@@ -39,12 +39,10 @@ const Events = () => {
         return null;
     };
 
-    // Helper function to create URL-friendly slugs from event names
     const createSlug = (name) => {
         return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     };
 
-    // Function to handle navigation to event detail page
     const navigateToEventDetail = (concert) => {
         const eventSlug = createSlug(concert.name);
         navigate(`/event/${eventSlug}`, { state: { concert } });
@@ -177,12 +175,10 @@ const Events = () => {
             );
         }
 
-        // Apply genre filter
         if (selectedGenres.length > 0) {
             result = result.filter(concert => selectedGenres.includes(concert.genre));
         }
 
-        // Apply country filter
         if (selectedCountry) {
             result = result.filter(concert => {
                 const concertCity = concert.location;
@@ -191,18 +187,15 @@ const Events = () => {
             });
         }
 
-        // Apply city filter
         if (selectedCity) {
             result = result.filter(concert => concert.location === selectedCity);
         }
 
-        // Apply price filter
         result = result.filter(concert => {
             const concertPrice = parseFloat(concert.price.replace('$', ''));
             return concertPrice >= minPrice && concertPrice <= maxPrice;
         });
 
-        // Apply sorting
         switch(selectedOrder) {
             case "Price":
                 result.sort((a, b) => {

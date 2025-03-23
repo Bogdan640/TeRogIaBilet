@@ -1,6 +1,5 @@
-const { TextEncoder, TextDecoder } = require('util');
+import { TextEncoder, TextDecoder } from 'util';
 
-// Set up TextEncoder/TextDecoder globally
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
