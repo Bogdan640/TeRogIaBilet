@@ -7,7 +7,7 @@ import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Cart
 
 const Events = () => {
     const navigate = useNavigate();
-    const concertsPerPage = 3;
+    const [concertsPerPage, setConcertsPerPage] = useState(3);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedGenres, setSelectedGenres] = useState([]);
     const [selectedOrder, setSelectedOrder] = useState(orderByOptions[0]);
@@ -16,17 +16,19 @@ const Events = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [minPrice, setMinPrice] = useState(0);
     const [maxPrice, setMaxPrice] = useState(1000);
+    const [concertsData, setConcertsData] = useState([...concerts]);
     const [filteredConcerts, setFilteredConcerts] = useState([...concerts]);
     const [priceThresholds, setPriceThresholds] = useState({ low: 0, medium: 0, high: 0 });
     const [showCharts, setShowCharts] = useState(false);
+    const [showItemsPerPageModal, setShowItemsPerPageModal] = useState(false);
 
-    // Chart data states
+    const itemsPerPageOptions = [3, 4, 5, 10, 15];
+
     const [priceDistributionData, setPriceDistributionData] = useState([]);
     const [genreDistributionData, setGenreDistributionData] = useState([]);
     const [priceTrendData, setPriceTrendData] = useState([]);
 
-    // For simulating real-time data
-    const dataFetchIntervalRef = useRef(null);
+    const updateIntervalRef = useRef(null);
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658'];
 
     // Helper function to find which country a city belongs to
@@ -79,7 +81,7 @@ const Events = () => {
         }
     };
 
-    // Generate price distribution data
+    // Generate price distribution data from actual concerts
     const calculatePriceDistributionData = (concerts) => {
         if (concerts.length === 0) return [];
 
@@ -97,7 +99,7 @@ const Events = () => {
         ];
     };
 
-    // Generate genre distribution data
+    // Generate genre distribution data from actual concerts
     const calculateGenreDistributionData = (concerts) => {
         if (concerts.length === 0) return [];
 
@@ -116,54 +118,113 @@ const Events = () => {
         }));
     };
 
-    // Simulate price trend data (like ticket price changes over time)
-    const generatePriceTrendData = () => {
-        // Get dates in ascending order
-        const dates = [...new Set(filteredConcerts.map(concert => concert.date))].sort((a, b) => new Date(a) - new Date(b));
+    // Generate price trend data from actual concerts
+    const calculatePriceTrendData = (concerts) => {
+        if (concerts.length === 0) return [];
 
-        // For each date, calculate average price
-        return dates.map(date => {
-            const concertsOnDate = filteredConcerts.filter(concert => concert.date === date);
-            const avgPrice = concertsOnDate.reduce((sum, concert) => sum + parseFloat(concert.price.replace('$', '')), 0) / concertsOnDate.length;
-
-            // Add some random variation to simulate real-time changes
-            const variation = (Math.random() * 20) - 10; // Random value between -10 and 10
-
-            return {
-                date: date,
-                price: avgPrice + variation
-            };
-        });
-    };
-
-    // Fetch new data asynchronously (simulation)
-    const fetchNewData = () => {
-        // Simulate asynchronous data fetch with setTimeout
-        setTimeout(() => {
-            // Update price trend data
-            setPriceTrendData(generatePriceTrendData());
-
-            // Add slight variations to other charts
-            const updatedPriceDistribution = priceDistributionData.map(item => ({
-                ...item,
-                value: Math.max(1, item.value + Math.floor(Math.random() * 3) - 1) // Add -1, 0, or 1
-            }));
-            setPriceDistributionData(updatedPriceDistribution);
-
-            // Update genre distribution occasionally
-            if (Math.random() > 0.7) {
-                const updatedGenreDistribution = genreDistributionData.map(item => ({
-                    ...item,
-                    value: Math.max(1, item.value + Math.floor(Math.random() * 3) - 1)
-                }));
-                setGenreDistributionData(updatedGenreDistribution);
+        // Group concerts by date
+        const concertsByDate = {};
+        concerts.forEach(concert => {
+            if (!concertsByDate[concert.date]) {
+                concertsByDate[concert.date] = [];
             }
-        }, 500); // Simulate network delay
+            concertsByDate[concert.date].push(concert);
+        });
+
+        // Calculate average price for each date
+        return Object.keys(concertsByDate)
+            .sort((a, b) => new Date(a) - new Date(b))
+            .map(date => {
+                const concertsOnDate = concertsByDate[date];
+                const avgPrice = concertsOnDate.reduce(
+                    (sum, concert) => sum + parseFloat(concert.price.replace('$', '')),
+                    0
+                ) / concertsOnDate.length;
+
+                return {
+                    date: date,
+                    price: avgPrice
+                };
+            });
     };
 
-    // Apply filters whenever any filter changes
+    // Function to add a new random concert
+    const addRandomConcert = () => {
+        // Generate a random concert
+        const genres = ["Rock", "Pop", "Jazz", "Classical", "Hip Hop", "Electronic", "Country"];
+        const locations = ["New York", "Los Angeles", "Chicago", "Houston", "Miami", "Seattle", "Boston"];
+        const dates = [
+            "2025-04-15", "2025-04-20", "2025-05-01", "2025-05-10",
+            "2025-05-15", "2025-05-25", "2025-06-05", "2025-06-15"
+        ];
+
+        const newConcert = {
+            id: concertsData.length + 1,
+            name: `Concert ${Math.floor(Math.random() * 1000)}`,
+            genre: genres[Math.floor(Math.random() * genres.length)],
+            price: `$${Math.floor(Math.random() * 500) + 50}`,
+            location: locations[Math.floor(Math.random() * locations.length)],
+            date: dates[Math.floor(Math.random() * dates.length)],
+            imageUrl: "https://via.placeholder.com/450x180"
+        };
+
+        setConcertsData(prevConcerts => [...prevConcerts, newConcert]);
+    };
+
+    // Function to remove a random concert
+    const removeRandomConcert = () => {
+        if (concertsData.length > 1) {
+            const randomIndex = Math.floor(Math.random() * concertsData.length);
+            setConcertsData(prevConcerts => prevConcerts.filter((_, index) => index !== randomIndex));
+        }
+    };
+
+    // Function to update a random concert's price
+    const updateRandomConcertPrice = () => {
+        if (concertsData.length > 0) {
+            const randomIndex = Math.floor(Math.random() * concertsData.length);
+            setConcertsData(prevConcerts =>
+                prevConcerts.map((concert, index) =>
+                    index === randomIndex
+                        ? {...concert, price: `$${Math.floor(Math.random() * 500) + 50}`}
+                        : concert
+                )
+            );
+        }
+    };
+
+    // Perform random data modification
+    const performRandomDataUpdate = () => {
+        const updateType = Math.floor(Math.random() * 3);
+        switch (updateType) {
+            case 0:
+                addRandomConcert();
+                break;
+            case 1:
+                removeRandomConcert();
+                break;
+            case 2:
+                updateRandomConcertPrice();
+                break;
+            default:
+                addRandomConcert();
+        }
+    };
+
+
+    const handleItemsPerPageChange = (number) => {
+        setConcertsPerPage(number);
+        setCurrentPage(1);
+        setShowItemsPerPageModal(false);
+    };
+
+    // Toggle items per page modal
+    const toggleItemsPerPageModal = () => {
+        setShowItemsPerPageModal(!showItemsPerPageModal);
+    };
+
     useEffect(() => {
-        let result = [...concerts];
+        let result = [...concertsData];
 
         // Apply search filter
         if (searchQuery) {
@@ -222,29 +283,28 @@ const Events = () => {
 
         setFilteredConcerts(result);
         setCurrentPage(1); // Reset to first page when filters change
-    }, [selectedGenres, selectedOrder, selectedCountry, selectedCity, searchQuery, minPrice, maxPrice]);
+    }, [concertsData, selectedGenres, selectedOrder, selectedCountry, selectedCity, searchQuery, minPrice, maxPrice]);
 
-    // Update chart data when filtered concerts change
     useEffect(() => {
-        // Generate initial chart data
+        // Update chart data based on actual filtered concerts
         setPriceDistributionData(calculatePriceDistributionData(filteredConcerts));
         setGenreDistributionData(calculateGenreDistributionData(filteredConcerts));
-        setPriceTrendData(generatePriceTrendData());
+        setPriceTrendData(calculatePriceTrendData(filteredConcerts));
 
-        // Setup interval for real-time updates
+        // Setup interval for real data updates when charts are shown
         if (showCharts) {
-            dataFetchIntervalRef.current = setInterval(fetchNewData, 3000);
+            updateIntervalRef.current = setInterval(performRandomDataUpdate, 3000);
         }
 
         // Cleanup interval when component unmounts or filters change
         return () => {
-            if (dataFetchIntervalRef.current) {
-                clearInterval(dataFetchIntervalRef.current);
+            if (updateIntervalRef.current) {
+                clearInterval(updateIntervalRef.current);
             }
         };
     }, [filteredConcerts, showCharts, priceThresholds]);
 
-    // Calculate pagination
+
     const totalPages = Math.ceil(filteredConcerts.length / concertsPerPage);
     const startIndex = (currentPage - 1) * concertsPerPage;
     const selectedConcerts = filteredConcerts.slice(startIndex, startIndex + concertsPerPage);
@@ -292,6 +352,7 @@ const Events = () => {
             <div className="main-container">
                 <div className="charts-toggle">
                     <button
+                        data-testid="analytics-toggle-button"
                         className={`chart-toggle-button ${showCharts ? 'active' : ''}`}
                         onClick={toggleCharts}
                     >
@@ -301,7 +362,7 @@ const Events = () => {
 
                 {showCharts && (
                     <div className="charts-container">
-                        <h2>Real-Time Event Analytics</h2>
+                        <h2>Live Event Analytics</h2>
                         <div className="charts-grid">
                             <div className="chart-card">
                                 <h3>Price Distribution</h3>
@@ -347,7 +408,7 @@ const Events = () => {
                                 </ResponsiveContainer>
                             </div>
                             <div className="chart-card">
-                                <h3>Price Trends Over Time</h3>
+                                <h3>Price Trends By Date</h3>
                                 <ResponsiveContainer width="100%" height={250}>
                                     <LineChart
                                         data={priceTrendData}
@@ -365,7 +426,7 @@ const Events = () => {
                         </div>
                         <div className="chart-update-info">
                             <div className="update-indicator pulsing"></div>
-                            <span>Data refreshes automatically every 3 seconds</span>
+                            <span>Live data: Events are randomly added, removed or updated every 3 seconds ({concertsData.length} total events)</span>
                         </div>
                     </div>
                 )}
@@ -500,32 +561,57 @@ const Events = () => {
                             </div>
                         )}
 
-                        <div className="pagination">
-                            <button
-                                className="page-button"
-                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                            >
-                                Prev
-                            </button>
-
-                            {[...Array(totalPages)].map((_, index) => (
+                        <div className="pagination-controls">
+                            <div className="items-per-page">
                                 <button
-                                    key={index}
-                                    className={`page-button ${currentPage === index + 1 ? "active" : ""}`}
-                                    onClick={() => setCurrentPage(index + 1)}
+                                    className="items-per-page-button"
+                                    onClick={toggleItemsPerPageModal}
                                 >
-                                    {index + 1}
+                                    Items per page: {concertsPerPage} ▼
                                 </button>
-                            ))}
 
-                            <button
-                                className="page-button"
-                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                            >
-                                Next
-                            </button>
+                                {showItemsPerPageModal && (
+                                    <div className="items-per-page-modal">
+                                        {itemsPerPageOptions.map(number => (
+                                            <button
+                                                key={number}
+                                                className={`modal-option ${concertsPerPage === number ? 'active' : ''}`}
+                                                onClick={() => handleItemsPerPageChange(number)}
+                                            >
+                                                {number}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="pagination">
+                                <button
+                                    className="page-button"
+                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                >
+                                    Prev
+                                </button>
+
+                                {[...Array(totalPages)].map((_, index) => (
+                                    <button
+                                        key={index}
+                                        className={`page-button ${currentPage === index + 1 ? "active" : ""}`}
+                                        onClick={() => setCurrentPage(index + 1)}
+                                    >
+                                        {index + 1}
+                                    </button>
+                                ))}
+
+                                <button
+                                    className="page-button"
+                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    Next
+                                </button>
+                            </div>
                         </div>
                     </main>
                 </div>

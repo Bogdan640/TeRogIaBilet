@@ -536,3 +536,77 @@
             box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
         }
     }
+
+
+    .pagination-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+
+    .items-per-page {
+        position: relative;
+        display: inline-block;
+    }
+
+    .items-per-page-button {
+        background: #FFD700;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.3s;
+        min-width: 150px;
+        text-align: left;
+    }
+
+    .items-per-page-button:hover {
+        background: #e6c300;
+    }
+
+    .items-per-page-modal {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: #444;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        z-index: 10;
+        min-width: 150px;
+        margin-top: 5px;
+        overflow: hidden;
+    }
+
+    .modal-option {
+        background: none;
+        border: none;
+        color: white;
+        padding: 8px 15px;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .modal-option:hover {
+        background: #555;
+    }
+
+    .modal-option.active {
+        background: #FFD700;
+        color: black;
+        font-weight: bold;
+    }
+
+    .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+

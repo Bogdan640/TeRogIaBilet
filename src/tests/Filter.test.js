@@ -85,6 +85,32 @@ describe("Events Filtering Tests", () => {
             expect(screen.queryByText("Concert C")).not.toBeInTheDocument();
         });
     });
+
+    test("filters concerts by price range", async () => {
+        render(
+            <Router>
+                <Events />
+            </Router>
+        );
+
+        // Get the min price range input (first range input)
+        const minPriceSlider = screen.getAllByRole("slider")[0];
+        // Get the max price range input (second range input)
+        const maxPriceSlider = screen.getAllByRole("slider")[1];
+
+        // Set min price to $40 (excludes Concert B at $30)
+        fireEvent.change(minPriceSlider, { target: { value: 40 } });
+
+        // Set max price to $60 (excludes Concert A at $70)
+        fireEvent.change(maxPriceSlider, { target: { value: 60 } });
+
+        await waitFor(() => {
+            // Only Concert C at $50 should be visible
+            expect(screen.queryByText("Concert A")).not.toBeInTheDocument();
+            expect(screen.queryByText("Concert B")).not.toBeInTheDocument();
+            expect(screen.getByText("Concert C")).toBeInTheDocument();
+        });
+    });
 });
 
 describe("Events Sorting Tests", () => {

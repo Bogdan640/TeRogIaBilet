@@ -73,4 +73,84 @@ describe("Events Component Tests", () => {
         );
     });
 
+    test("should toggle and use the items per page dropdown", async () => {
+        render(
+            <Router>
+                <Events />
+            </Router>
+        );
+
+        expect(screen.getByText("Items per page: 3 ▼")).toBeInTheDocument();
+        expect(screen.queryByText("5")).not.toBeInTheDocument();
+
+        fireEvent.click(screen.getByText("Items per page: 3 ▼"));
+        expect(screen.getByText("5")).toBeInTheDocument();
+
+        fireEvent.click(screen.getByText("5"));
+
+        expect(screen.getByText("Items per page: 5 ▼")).toBeInTheDocument();
+        expect(screen.queryByText("10")).not.toBeInTheDocument();
+
+        fireEvent.click(screen.getByText("Items per page: 5 ▼"));
+        expect(screen.getByText("10")).toBeInTheDocument();
+
+        fireEvent.click(screen.getByText("Items per page: 5 ▼"));
+        expect(screen.queryByText("10")).not.toBeInTheDocument();
+    });
+
+
+    test("should navigate through pagination", () => {
+        render(
+            <Router>
+                <Events />
+            </Router>
+        );
+
+        // Set items per page to the smallest available option
+        fireEvent.click(screen.getByText("Items per page: 3 ▼"));
+        fireEvent.click(screen.getByText("4"));
+
+        // Since we have only 3 concerts and our items per page is now larger,
+        // there should only be one page and the Next button should be disabled
+        const nextButton = screen.getByText("Next");
+        expect(nextButton).toBeDisabled();
+
+        // Both Prev and Next buttons should work when appropriate
+        const prevButton = screen.getByText("Prev");
+        expect(prevButton).toBeDisabled(); // Disabled on first page
+    });
+
+
+    test("shows 'No events found' message when filters exclude all concerts", async () => {
+        render(
+            <Router>
+                <Events />
+            </Router>
+        );
+
+        // Search for a term that won't match any concerts
+        const searchBox = screen.getByPlaceholderText("Search");
+        fireEvent.change(searchBox, { target: { value: "NonexistentConcert" } });
+
+        await waitFor(() => {
+            expect(screen.getByText("No events found")).toBeInTheDocument();
+            expect(screen.getByText("Try adjusting your filters")).toBeInTheDocument();
+        });
+    });
+
+    test("disables city dropdown when no country is selected", () => {
+        render(
+            <Router>
+                <Events />
+            </Router>
+        );
+
+        // The third dropdown is the city dropdown (after order by and country)
+        const cityDropdown = screen.getAllByRole("combobox")[2];
+        expect(cityDropdown).toBeDisabled();
+        const countryDropdown = screen.getAllByRole("combobox")[1];
+        fireEvent.change(countryDropdown, { target: { value: "Country A" } });
+        expect(cityDropdown).not.toBeDisabled();
+    });
+
 });
