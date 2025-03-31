@@ -1,25 +1,40 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/SignIn.css';
+import { authService } from '../api/api';
 
 function SignIn() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         // Clear any previous error messages
         setError('');
+        setLoading(true);
 
-        // Check for admin credentials
-        if (email === 'bogdan@ubb.ro' && password === 'melc') {
-            console.log('Admin login successful');
-            navigate('/admin'); // Redirect to admin page
-        } else {
-            console.log('Login attempt with:', email, password);
-            setError('Invalid email or password');
+        try {
+            const response = await authService.login(email, password);
+
+            // Store user info in localStorage
+            localStorage.setItem('user', JSON.stringify(response.user));
+
+            // Check if the user is admin
+            if (response.user && response.user.role === 'admin') {
+                console.log('Admin login successful');
+                navigate('/admin');
+            } else {
+                console.log('User login successful');
+                navigate('/events'); // Redirect regular users to events page
+            }
+        } catch (err) {
+            console.error('Login failed:', err);
+            setError(err.message || 'Invalid email or password');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -54,7 +69,13 @@ function SignIn() {
 
                     {error && <div className="error-message">{error}</div>}
 
-                    <button type="submit" className="signin-button">SIGN IN</button>
+                    <button
+                        type="submit"
+                        className="signin-button"
+                        disabled={loading}
+                    >
+                        {loading ? 'SIGNING IN...' : 'SIGN IN'}
+                    </button>
                 </form>
 
                 <div className="signup-link">

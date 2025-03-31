@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
-import {useNavigate} from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 import '../styles/AdminPage.css';
-import concerts from '../In_memory_storage/Concerts.js'; // Import your concerts data
+import { concertService, authService } from '../api/api.js';
 
 function AdminPage() {
     const navigate = useNavigate();
+
+    // State for concerts data
+    const [concerts, setConcerts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [apiError, setApiError] = useState('');
 
     // State for new event form
     const [newEvent, setNewEvent] = useState({
@@ -27,6 +32,35 @@ function AdminPage() {
 
     // State for success message
     const [successMessage, setSuccessMessage] = useState('');
+
+    // Check authentication when component mounts
+    useEffect(() => {
+        const user = authService.getCurrentUser();
+        if (!user || user.role !== 'admin') {
+            console.log('Unauthorized access, redirecting to login');
+            navigate('/signin');
+            return;
+        }
+
+        // If authenticated as admin, fetch concerts
+        fetchConcerts();
+    }, [navigate]);
+
+    const fetchConcerts = async () => {
+        try {
+            setLoading(true);
+            console.log('Fetching concerts...');
+            const data = await concertService.getAll();
+            console.log('Concerts fetched:', data);
+            setConcerts(data.concerts || data); // Handle different response formats
+            setApiError('');
+        } catch (error) {
+            console.error('Error fetching concerts:', error);
+            setApiError('Failed to load concerts. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Handle input changes
     const handleInputChange = (e) => {
@@ -93,49 +127,46 @@ function AdminPage() {
     };
 
     // Handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (validateForm()) {
-            if (isEditMode && selectedEvent) {
-                // Update existing event
-                const eventIndex = concerts.findIndex(concert => concert.id === selectedEvent.id);
-                if (eventIndex !== -1) {
-                    concerts[eventIndex] = {
-                        ...concerts[eventIndex],
-                        ...newEvent
-                    };
+            try {
+                if (isEditMode && selectedEvent) {
+                    // Update existing event
+                    await concertService.update(selectedEvent.id, newEvent);
                     setSuccessMessage(`Event "${newEvent.name}" has been updated successfully!`);
+                    setIsEditMode(false);
+                } else {
+                    // Add new event
+                    await concertService.create(newEvent);
+                    setSuccessMessage(`Event "${newEvent.name}" has been added successfully!`);
                 }
-                setIsEditMode(false);
-            } else {
-                // Add new event
-                const newId = Math.max(...concerts.map(concert => concert.id), 0) + 1;
-                const eventToAdd = {
-                    id: newId,
-                    ...newEvent
-                };
-                concerts.push(eventToAdd);
-                setSuccessMessage(`Event "${newEvent.name}" has been added successfully!`);
+
+                // Reset form
+                setNewEvent({
+                    name: '',
+                    genre: '',
+                    price: '',
+                    location: '',
+                    date: '',
+                    imageUrl: ''
+                });
+
+                // Reset selected event
+                setSelectedEvent(null);
+
+                // Refresh concerts list
+                fetchConcerts();
+
+                // Clear success message after 3 seconds
+                setTimeout(() => {
+                    setSuccessMessage('');
+                }, 3000);
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                setApiError('Failed to save event. Please try again.');
             }
-
-            // Reset form
-            setNewEvent({
-                name: '',
-                genre: '',
-                price: '',
-                location: '',
-                date: '',
-                imageUrl: ''
-            });
-
-            // Reset selected event
-            setSelectedEvent(null);
-
-            // Clear success message after 3 seconds
-            setTimeout(() => {
-                setSuccessMessage('');
-            }, 3000);
         }
     };
 
@@ -183,25 +214,30 @@ function AdminPage() {
     };
 
     // Handle remove event
-    const handleRemoveEvent = () => {
+    const handleRemoveEvent = async () => {
         if (selectedEvent) {
-            const eventIndex = concerts.findIndex(concert => concert.id === selectedEvent.id);
-            if (eventIndex !== -1) {
-                const eventName = concerts[eventIndex].name;
-                concerts.splice(eventIndex, 1);
-                setSuccessMessage(`Event "${eventName}" has been removed successfully!`);
+            try {
+                await concertService.delete(selectedEvent.id);
+                setSuccessMessage(`Event "${selectedEvent.name}" has been removed successfully!`);
                 setSelectedEvent(null);
+
+                // Refresh concerts list
+                fetchConcerts();
 
                 // Clear success message after 3 seconds
                 setTimeout(() => {
                     setSuccessMessage('');
                 }, 3000);
+            } catch (error) {
+                console.error('Error removing event:', error);
+                setApiError('Failed to remove event. Please try again.');
             }
         }
     };
 
     // Handle logout
     const handleLogout = () => {
+        authService.logout();
         navigate('/'); // Navigate to home page on logout
     };
 
@@ -218,6 +254,10 @@ function AdminPage() {
 
                     {successMessage && (
                         <div className="dashboard-success-message">{successMessage}</div>
+                    )}
+
+                    {apiError && (
+                        <div className="dashboard-error-message">{apiError}</div>
                     )}
 
                     <form onSubmit={handleSubmit} className="dashboard-event-form">
@@ -334,6 +374,16 @@ function AdminPage() {
                 <div className="dashboard-listing-section">
                     <h2>Current Events ({concerts.length})</h2>
 
+                    {loading && <div className="dashboard-loading">Loading...</div>}
+
+                    {apiError && (
+                        <div className="dashboard-error-message">{apiError}</div>
+                    )}
+
+                    {concerts.length === 0 && !loading && (
+                        <div className="dashboard-no-events">No events found.</div>
+                    )}
+
                     {concerts.length > 0 && (
                         <div className="dashboard-action-buttons">
                             <button
@@ -375,6 +425,10 @@ function AdminPage() {
                     </div>
                 </div>
             </div>
+
+            <footer className="dashboard-admin-footer">
+                <p>&copy; {new Date().getFullYear()} Your Company. All rights reserved.</p>
+            </footer>
         </div>
     );
 }

@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Events.css";
-import concerts from '../In_memory_storage/Concerts.js';
-import { genresList, orderByOptions, countries, cities } from '../In_memory_storage/Filters.js';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const Events = () => {
@@ -10,17 +8,27 @@ const Events = () => {
     const [concertsPerPage, setConcertsPerPage] = useState(3);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedGenres, setSelectedGenres] = useState([]);
-    const [selectedOrder, setSelectedOrder] = useState(orderByOptions[0]);
+    const [selectedOrder, setSelectedOrder] = useState("Date");
     const [selectedCountry, setSelectedCountry] = useState("");
     const [selectedCity, setSelectedCity] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [minPrice, setMinPrice] = useState(0);
     const [maxPrice, setMaxPrice] = useState(1000);
-    const [concertsData, setConcertsData] = useState([...concerts]);
-    const [filteredConcerts, setFilteredConcerts] = useState([...concerts]);
+    const [concertsData, setConcertsData] = useState([]);
+    const [filteredConcerts, setFilteredConcerts] = useState([]);
     const [priceThresholds, setPriceThresholds] = useState({ low: 0, medium: 0, high: 0 });
     const [showCharts, setShowCharts] = useState(false);
     const [showItemsPerPageModal, setShowItemsPerPageModal] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [totalCount, setTotalCount] = useState(0);
+    const [lastUpdate, setLastUpdate] = useState(0);
+
+    // Filter options
+    const [genresList, setGenresList] = useState([]);
+    const [orderByOptions, setOrderByOptions] = useState([]);
+    const [countries, setCountries] = useState([]);
+    const [cities, setCities] = useState({});
 
     const itemsPerPageOptions = [3, 4, 5, 10, 15];
 
@@ -28,8 +36,119 @@ const Events = () => {
     const [genreDistributionData, setGenreDistributionData] = useState([]);
     const [priceTrendData, setPriceTrendData] = useState([]);
 
-    const updateIntervalRef = useRef(null);
+    const pollingIntervalRef = useRef(null);
+    const analyticsPollingRef = useRef(null);
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658'];
+
+    const API_BASE_URL = 'http://localhost:3001/api';
+
+    // Fetch filter options from the server
+    useEffect(() => {
+        const fetchFilterOptions = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/filters`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch filter options');
+                }
+                const data = await response.json();
+                setGenresList(data.genres);
+                setOrderByOptions(data.orderBy);
+                setCountries(data.countries);
+                setCities(data.cities);
+            } catch (error) {
+                console.error('Error fetching filter options:', error);
+                setError('Failed to load filter options. Please try again later.');
+            }
+        };
+
+        fetchFilterOptions();
+    }, []);
+
+    // Function to fetch concerts based on current filters
+    const fetchConcerts = async () => {
+        try {
+            setIsLoading(true);
+
+            // Build query parameters
+            const params = new URLSearchParams();
+            if (searchQuery) params.append('search', searchQuery);
+            if (selectedGenres.length > 0) params.append('genre', selectedGenres.join(','));
+            if (selectedOrder) params.append('orderBy', selectedOrder);
+            if (selectedCountry) params.append('country', selectedCountry);
+            if (selectedCity) params.append('city', selectedCity);
+            params.append('minPrice', minPrice);
+            params.append('maxPrice', maxPrice);
+
+            const response = await fetch(`${API_BASE_URL}/concerts?${params.toString()}`);
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch concerts');
+            }
+
+            const data = await response.json();
+            setConcertsData(data.concerts);
+            setFilteredConcerts(data.concerts);
+            setTotalCount(data.totalCount);
+            setPriceThresholds(data.priceThresholds);
+            setLastUpdate(data.lastUpdate);
+            setError(null);
+        } catch (error) {
+            console.error('Error fetching concerts:', error);
+            setError('Failed to load concerts. Please try again later.');
+            setConcertsData([]);
+            setFilteredConcerts([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Initial fetch of concerts
+    useEffect(() => {
+        fetchConcerts();
+    }, []);
+
+    // Fetch analytics data
+    const fetchAnalyticsData = async () => {
+        if (!showCharts) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/concerts/analytics`);
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch analytics data');
+            }
+
+            const data = await response.json();
+            setPriceDistributionData(data.priceDistributionData);
+            setGenreDistributionData(data.genreDistributionData);
+            setPriceTrendData(data.priceTrendData);
+
+            // If the lastUpdate time is newer than what we have, refresh concerts
+            if (data.lastUpdate > lastUpdate) {
+                fetchConcerts();
+            }
+        } catch (error) {
+            console.error('Error fetching analytics data:', error);
+        }
+    };
+
+    // Trigger a simulated data update
+    const triggerDataUpdate = async () => {
+        if (!showCharts) return;
+
+        try {
+            await fetch(`${API_BASE_URL}/concerts/simulate-update`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            // After update, fetch fresh data
+            fetchAnalyticsData();
+        } catch (error) {
+            console.error('Error triggering data update:', error);
+        }
+    };
 
     // Helper function to find which country a city belongs to
     const getCityCountry = (cityName) => {
@@ -50,25 +169,6 @@ const Events = () => {
         navigate(`/event/${eventSlug}`, { state: { concert } });
     };
 
-    // Function to calculate price thresholds for the current filtered concerts
-    const calculatePriceThresholds = (concerts) => {
-        if (concerts.length === 0) return { low: 0, medium: 0, high: 0 };
-
-        // Extract prices and sort them
-        const prices = concerts.map(concert => parseFloat(concert.price.replace('$', '')));
-        prices.sort((a, b) => a - b);
-
-        // Calculate thresholds - dividing into three approximately equal groups
-        const lowThreshold = prices[Math.floor(prices.length / 3)];
-        const mediumThreshold = prices[Math.floor(prices.length * 2 / 3)];
-
-        return {
-            low: lowThreshold,
-            medium: mediumThreshold,
-            high: prices[prices.length - 1]
-        };
-    };
-
     // Function to determine button color based on price
     const getButtonColorClass = (price) => {
         const numericPrice = parseFloat(price.replace('$', ''));
@@ -81,136 +181,35 @@ const Events = () => {
         }
     };
 
-    // Generate price distribution data from actual concerts
-    const calculatePriceDistributionData = (concerts) => {
-        if (concerts.length === 0) return [];
+    // Set up polling for data updates when charts are shown
+    useEffect(() => {
+        if (showCharts) {
+            // Fetch initial analytics data
+            fetchAnalyticsData();
 
-        const lowCount = concerts.filter(concert => parseFloat(concert.price.replace('$', '')) <= priceThresholds.low).length;
-        const mediumCount = concerts.filter(concert => {
-            const price = parseFloat(concert.price.replace('$', ''));
-            return price > priceThresholds.low && price <= priceThresholds.medium;
-        }).length;
-        const highCount = concerts.filter(concert => parseFloat(concert.price.replace('$', '')) > priceThresholds.medium).length;
+            // Set up polling intervals
+            analyticsPollingRef.current = setInterval(fetchAnalyticsData, 5000); // Poll for analytics every 5 seconds
+            pollingIntervalRef.current = setInterval(triggerDataUpdate, 3000); // Trigger updates every 3 seconds
+        }
 
-        return [
-            { name: 'Low', value: lowCount },
-            { name: 'Medium', value: mediumCount },
-            { name: 'High', value: highCount }
-        ];
-    };
-
-    // Generate genre distribution data from actual concerts
-    const calculateGenreDistributionData = (concerts) => {
-        if (concerts.length === 0) return [];
-
-        const genreCounts = {};
-        concerts.forEach(concert => {
-            if (genreCounts[concert.genre]) {
-                genreCounts[concert.genre]++;
-            } else {
-                genreCounts[concert.genre] = 1;
+        // Cleanup interval when component unmounts or showCharts changes
+        return () => {
+            if (analyticsPollingRef.current) {
+                clearInterval(analyticsPollingRef.current);
+                analyticsPollingRef.current = null;
             }
-        });
-
-        return Object.keys(genreCounts).map(genre => ({
-            name: genre,
-            value: genreCounts[genre]
-        }));
-    };
-
-    // Generate price trend data from actual concerts
-    const calculatePriceTrendData = (concerts) => {
-        if (concerts.length === 0) return [];
-
-        // Group concerts by date
-        const concertsByDate = {};
-        concerts.forEach(concert => {
-            if (!concertsByDate[concert.date]) {
-                concertsByDate[concert.date] = [];
+            if (pollingIntervalRef.current) {
+                clearInterval(pollingIntervalRef.current);
+                pollingIntervalRef.current = null;
             }
-            concertsByDate[concert.date].push(concert);
-        });
-
-        // Calculate average price for each date
-        return Object.keys(concertsByDate)
-            .sort((a, b) => new Date(a) - new Date(b))
-            .map(date => {
-                const concertsOnDate = concertsByDate[date];
-                const avgPrice = concertsOnDate.reduce(
-                    (sum, concert) => sum + parseFloat(concert.price.replace('$', '')),
-                    0
-                ) / concertsOnDate.length;
-
-                return {
-                    date: date,
-                    price: avgPrice
-                };
-            });
-    };
-
-    // Function to add a new random concert
-    const addRandomConcert = () => {
-        // Generate a random concert
-        const genres = ["Rock", "Pop", "Jazz", "Classical", "Hip Hop", "Electronic", "Country"];
-        const locations = ["New York", "Los Angeles", "Chicago", "Houston", "Miami", "Seattle", "Boston"];
-        const dates = [
-            "2025-04-15", "2025-04-20", "2025-05-01", "2025-05-10",
-            "2025-05-15", "2025-05-25", "2025-06-05", "2025-06-15"
-        ];
-
-        const newConcert = {
-            id: concertsData.length + 1,
-            name: `Concert ${Math.floor(Math.random() * 1000)}`,
-            genre: genres[Math.floor(Math.random() * genres.length)],
-            price: `$${Math.floor(Math.random() * 500) + 50}`,
-            location: locations[Math.floor(Math.random() * locations.length)],
-            date: dates[Math.floor(Math.random() * dates.length)],
-            imageUrl: "https://via.placeholder.com/450x180"
         };
+    }, [showCharts]);
 
-        setConcertsData(prevConcerts => [...prevConcerts, newConcert]);
-    };
-
-    // Function to remove a random concert
-    const removeRandomConcert = () => {
-        if (concertsData.length > 1) {
-            const randomIndex = Math.floor(Math.random() * concertsData.length);
-            setConcertsData(prevConcerts => prevConcerts.filter((_, index) => index !== randomIndex));
-        }
-    };
-
-    // Function to update a random concert's price
-    const updateRandomConcertPrice = () => {
-        if (concertsData.length > 0) {
-            const randomIndex = Math.floor(Math.random() * concertsData.length);
-            setConcertsData(prevConcerts =>
-                prevConcerts.map((concert, index) =>
-                    index === randomIndex
-                        ? {...concert, price: `$${Math.floor(Math.random() * 500) + 50}`}
-                        : concert
-                )
-            );
-        }
-    };
-
-    // Perform random data modification
-    const performRandomDataUpdate = () => {
-        const updateType = Math.floor(Math.random() * 3);
-        switch (updateType) {
-            case 0:
-                addRandomConcert();
-                break;
-            case 1:
-                removeRandomConcert();
-                break;
-            case 2:
-                updateRandomConcertPrice();
-                break;
-            default:
-                addRandomConcert();
-        }
-    };
-
+    // Apply filters and recalculate pagination when filterConcerts or filters change
+    useEffect(() => {
+        // When filter options change, fetch new data
+        fetchConcerts();
+    }, [selectedGenres, selectedOrder, selectedCountry, selectedCity, searchQuery, minPrice, maxPrice]);
 
     const handleItemsPerPageChange = (number) => {
         setConcertsPerPage(number);
@@ -222,88 +221,6 @@ const Events = () => {
     const toggleItemsPerPageModal = () => {
         setShowItemsPerPageModal(!showItemsPerPageModal);
     };
-
-    useEffect(() => {
-        let result = [...concertsData];
-
-        // Apply search filter
-        if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            result = result.filter(concert =>
-                concert.name.toLowerCase().includes(query) ||
-                concert.genre.toLowerCase().includes(query) ||
-                concert.location.toLowerCase().includes(query)
-            );
-        }
-
-        if (selectedGenres.length > 0) {
-            result = result.filter(concert => selectedGenres.includes(concert.genre));
-        }
-
-        if (selectedCountry) {
-            result = result.filter(concert => {
-                const concertCity = concert.location;
-                const concertCountry = getCityCountry(concertCity);
-                return concertCountry === selectedCountry;
-            });
-        }
-
-        if (selectedCity) {
-            result = result.filter(concert => concert.location === selectedCity);
-        }
-
-        result = result.filter(concert => {
-            const concertPrice = parseFloat(concert.price.replace('$', ''));
-            return concertPrice >= minPrice && concertPrice <= maxPrice;
-        });
-
-        switch(selectedOrder) {
-            case "Price":
-                result.sort((a, b) => {
-                    // Remove $ sign and convert to number
-                    const priceA = parseFloat(a.price.replace('$', ''));
-                    const priceB = parseFloat(b.price.replace('$', ''));
-                    return priceA - priceB;
-                });
-                break;
-            case "Date":
-                result.sort((a, b) => new Date(a.date) - new Date(b.date));
-                break;
-            case "Location":
-                result.sort((a, b) => a.location.localeCompare(b.location));
-                break;
-            default:
-                // Default to date sorting
-                result.sort((a, b) => new Date(a.date) - new Date(b.date));
-        }
-
-        // Calculate new price thresholds based on filtered results
-        const newThresholds = calculatePriceThresholds(result);
-        setPriceThresholds(newThresholds);
-
-        setFilteredConcerts(result);
-        setCurrentPage(1); // Reset to first page when filters change
-    }, [concertsData, selectedGenres, selectedOrder, selectedCountry, selectedCity, searchQuery, minPrice, maxPrice]);
-
-    useEffect(() => {
-        // Update chart data based on actual filtered concerts
-        setPriceDistributionData(calculatePriceDistributionData(filteredConcerts));
-        setGenreDistributionData(calculateGenreDistributionData(filteredConcerts));
-        setPriceTrendData(calculatePriceTrendData(filteredConcerts));
-
-        // Setup interval for real data updates when charts are shown
-        if (showCharts) {
-            updateIntervalRef.current = setInterval(performRandomDataUpdate, 3000);
-        }
-
-        // Cleanup interval when component unmounts or filters change
-        return () => {
-            if (updateIntervalRef.current) {
-                clearInterval(updateIntervalRef.current);
-            }
-        };
-    }, [filteredConcerts, showCharts, priceThresholds]);
-
 
     const totalPages = Math.ceil(filteredConcerts.length / concertsPerPage);
     const startIndex = (currentPage - 1) * concertsPerPage;
@@ -426,7 +343,7 @@ const Events = () => {
                         </div>
                         <div className="chart-update-info">
                             <div className="update-indicator pulsing"></div>
-                            <span>Live data: Events are randomly added, removed or updated every 3 seconds ({concertsData.length} total events)</span>
+                            <span>Live data: Events are being updated from the server ({totalCount} total events)</span>
                         </div>
                     </div>
                 )}
@@ -505,7 +422,7 @@ const Events = () => {
                             <label>City</label>
                             <select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)} disabled={!selectedCountry}>
                                 <option value="">Select a City</option>
-                                {selectedCountry &&
+                                {selectedCountry && cities[selectedCountry] &&
                                     cities[selectedCountry].map((city, index) => (
                                         <option key={index} value={city}>{city}</option>
                                     ))
@@ -533,7 +450,11 @@ const Events = () => {
                     </aside>
 
                     <main className="event-list">
-                        {selectedConcerts.length > 0 ? (
+                        {isLoading ? (
+                            <div className="loading-message">Loading concerts...</div>
+                        ) : error ? (
+                            <div className="error-message">{error}</div>
+                        ) : selectedConcerts.length > 0 ? (
                             selectedConcerts.map((concert) => (
                                 <div className="event-card" key={concert.id}>
                                     <div className="event-info">
@@ -549,7 +470,7 @@ const Events = () => {
                                             See more info
                                         </button>
                                     </div>
-                                    <img src={concert.imageUrl} alt={concert.name} className="event-image" />
+                                    <img src={concert.imageUrl || "https://via.placeholder.com/450x180"} alt={concert.name} className="event-image" />
                                 </div>
                             ))
                         ) : (
