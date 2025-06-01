@@ -2,9 +2,9 @@ import React from 'react';
 import { useNavigate } from "react-router-dom";
 import 'D:\\School\\2ndY_S2\\MPP\\battlepass\\src\\styles\\MainPage.css';
 import '../components/ButtonMainPageStyle.css'
-import images from 'D:\\School\\2ndY_S2\\MPP\\battlepass\\src\\assets\\MainPageImages\\images.jpeg';
-import last from 'D:\\School\\2ndY_S2\\MPP\\battlepass\\src\\assets\\MainPageImages\\last.webp';
-import metal from 'D:\\School\\2ndY_S2\\MPP\\battlepass\\src\\assets\\MainPageImages\\metal1.jpg';
+import images from '../assets/MainPageImages/images.jpeg';
+import last from '../assets/MainPageImages/last.webp';
+import metal from '../assets/MainPageImages/metal1.jpg';
 
 
 function MainPage() {
@@ -73,7 +73,7 @@ function MainPage() {
                             </p>
                             <p>
                                 Really hard for whatever you'd like to do. And from just the
-                             x   right place, you can make every story very much story.
+                                right place, you can make every story very much story.
                             </p>
                         </div>
                         <div>
