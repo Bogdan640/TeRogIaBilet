@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from "react-router-dom";
 import '../styles/AdminPage.css';
-import { concertService, authService } from '../api/api.js';
+import { concertService } from '../api/api.js';
+import { authService } from '../api/authService.js';
 import { useOfflineSupport } from '../hooks/useOfflineSupport';
 
 function AdminPage() {
