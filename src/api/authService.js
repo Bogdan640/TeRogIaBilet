@@ -4,24 +4,42 @@ import { API_URL } from './api';
 export const authService = {
     // Add this new method
     register: async (name, email, password) => {
-        const response = await fetch(`${API_URL}/auth/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password })
-        });
+        try {
+            const response = await fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            });
 
-        const data = await response.json();
+            // Get the response text first
+            const responseText = await response.text();
 
-        if (data.error) {
-            throw new Error(data.error);
+            // Try to parse as JSON if possible
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (e) {
+                console.error('Non-JSON response:', responseText);
+                throw new Error(`Registration failed: ${response.status}`);
+            }
+
+            // Check for error in the response
+            if (!response.ok) {
+                const errorMessage = data.error || data.message || 'Registration failed';
+                console.error('Server error:', data);
+                throw new Error(errorMessage);
+            }
+
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Registration error:', error);
+            throw error;
         }
-
-        if (data.token) {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-        }
-
-        return data;
     },
 
     login: async (email, password) => {
