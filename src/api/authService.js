@@ -5,16 +5,19 @@ export const authService = {
     // Add this new method
     register: async (name, email, password) => {
         try {
+            console.log('Sending registration data:', { name, email, password });
+
             const response = await fetch(`${API_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, password })
             });
 
-            // Get the response text first
+            // Get the response text
             const responseText = await response.text();
+            console.log('Raw server response:', responseText);
 
-            // Try to parse as JSON if possible
+            // Try to parse as JSON
             let data;
             try {
                 data = JSON.parse(responseText);
@@ -23,11 +26,21 @@ export const authService = {
                 throw new Error(`Registration failed: ${response.status}`);
             }
 
+            // Log the complete response data
+            console.log('Parsed response data:', data);
+
             // Check for error in the response
             if (!response.ok) {
-                const errorMessage = data.error || data.message || 'Registration failed';
-                console.error('Server error:', data);
-                throw new Error(errorMessage);
+                // Extract error message from various possible locations
+                const errorMessage =
+                    typeof data === 'string' ? data :
+                        data.error ? data.error :
+                            data.message ? data.message :
+                                data.msg ? data.msg :
+                                    JSON.stringify(data);
+
+                console.error('Server error details:', errorMessage);
+                throw new Error(errorMessage || 'Registration failed');
             }
 
             if (data.token) {
