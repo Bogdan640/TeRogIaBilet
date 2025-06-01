@@ -40,7 +40,8 @@ const Events = () => {
     const analyticsPollingRef = useRef(null);
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658'];
 
-    const API_BASE_URL = 'http://localhost:3001/api';
+    const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    const API_BASE_URL = `${BASE_URL}/api`;
 
     // Fetch filter options from the server
     useEffect(() => {
