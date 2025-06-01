@@ -18,7 +18,7 @@ function App() {
                 <Route path="/" element={<MainPage />} />
                 <Route path="/events" element={<Events />} />
                 <Route path="/event/:eventSlug" element={<EventDetail />} />
-                <Route path="/" element={<Navigate to="/events" replace />} />
+
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/admin" element={<AdminPage />} />
             </Routes>
@@ -27,3 +27,5 @@ function App() {
 }
 
 export default App;
+
+//  <Route path="/" element={<Navigate to="/events" replace />} />
