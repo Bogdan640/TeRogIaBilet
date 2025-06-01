@@ -1,17 +1,7 @@
-// Base API URL
-const API_URL = 'http://localhost:3001/api';
+// Base API URL - use environment variable for production or fallback to localhost for development
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 // Get authentication headers
-// const getAuthHeaders = () => {
-//     const userString = localStorage.getItem('user');
-//     const user = userString ? JSON.parse(userString) : {};
-//     console.log('User from localStorage:', user);
-//     return {
-//         'Content-Type': 'application/json',
-//         ...(user.id ? { 'Authorization': `Bearer ${user.id}` } : {})
-//     };
-// };
-
 const getAuthHeaders = () => {
     return {
         'Content-Type': 'application/json'
@@ -83,6 +73,36 @@ export const concertService = {
             headers: getAuthHeaders()
         });
         return handleResponse(response);
+    },
+
+    // Added for offline support
+    // Bulk operations for syncing offline data
+    bulkSync: async (operations) => {
+        const response = await fetch(`${API_URL}/concerts/bulk`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ operations }),
+        });
+        return handleResponse(response);
+    },
+
+    // Check server health
+    checkHealth: async () => {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+            const response = await fetch(`${API_URL}/concerts/health`, {
+                signal: controller.signal,
+                headers: getAuthHeaders()
+            });
+
+            clearTimeout(timeoutId);
+            return response.ok;
+        } catch (error) {
+            console.error('Health check failed:', error);
+            return false;
+        }
     }
 };
 
