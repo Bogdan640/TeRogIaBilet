@@ -11,10 +11,12 @@
     "test": "jest"
   },
   "dependencies": {
+    "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.3.0",
-    "recharts": "^2.15.1"
+    "recharts": "^2.15.1",
+    "speakeasy": "^2.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",

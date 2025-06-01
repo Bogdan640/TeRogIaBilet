@@ -116,28 +116,3 @@ export const concertService = {
     }
 };
 
-// Authentication API
-export const authService = {
-    // Login
-    login: async (email, password) => {
-        const response = await fetch(`${API_URL}/auth/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, password })
-        });
-        return handleResponse(response);
-    },
-
-    // Check if the user is logged in
-    getCurrentUser: () => {
-        const userString = localStorage.getItem('user');
-        return userString ? JSON.parse(userString) : null;
-    },
-
-    // Logout
-    logout: () => {
-        localStorage.removeItem('user');
-    }
-};
