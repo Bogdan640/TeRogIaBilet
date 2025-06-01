@@ -30,6 +30,8 @@ if (!import.meta.env.VITE_API_URL) {
 }
 
 
+
+
 function App() {
     return (
         <BrowserRouter>
@@ -37,9 +39,20 @@ function App() {
                 <Route path="/" element={<MainPage />} />
                 <Route path="/events" element={<Events />} />
                 <Route path="/event/:eventSlug" element={<EventDetail />} />
-
                 <Route path="/signin" element={<SignIn />} />
-                <Route path="/admin" element={<AdminPage />} />
+
+                {/* Protected routes */}
+                <Route path="/admin" element={
+                    <ProtectedRoute requiredRole="admin">
+                        <AdminPage />
+                    </ProtectedRoute>
+                } />
+
+                <Route path="/profile/2fa-setup" element={
+                    <ProtectedRoute>
+                        <TwoFactorSetup />
+                    </ProtectedRoute>
+                } />
             </Routes>
         </BrowserRouter>
     );
