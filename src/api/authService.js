@@ -1,16 +1,21 @@
 // src/api/authService.js
+import { API_URL } from './api';
+
 export const authService = {
-    // Login (updated to handle JWT)
-    login: async (email, password) => {
-        const response = await fetch(`${API_URL}/auth/login`, {
+    // Add this new method
+    register: async (name, email, password) => {
+        const response = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ name, email, password })
         });
 
-        const data = await handleResponse(response);
+        const data = await response.json();
 
-        // Store the token in localStorage
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
         if (data.token) {
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
@@ -19,22 +24,32 @@ export const authService = {
         return data;
     },
 
-    // Get current user with token check
+    login: async (email, password) => {
+        const response = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        if (data.token && !data.requireTwoFactor) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+        }
+
+        return data;
+    },
+
     getCurrentUser: () => {
         const user = localStorage.getItem('user');
-        const token = localStorage.getItem('token');
-
-        if (!user || !token) return null;
-        return JSON.parse(user);
+        return user ? JSON.parse(user) : null;
     },
 
-    // Logout
-    logout: () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-    },
-
-    // Check if the token is still valid
     checkTokenValidity: async () => {
         const token = localStorage.getItem('token');
         if (!token) return false;
@@ -49,5 +64,10 @@ export const authService = {
         } catch {
             return false;
         }
+    },
+
+    logout: () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
     }
 };

@@ -9,6 +9,7 @@ import SignIn from "./pages/SignIn.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import TwoFactorSetup from "./components/TwoFactorSetup.jsx";
+import SignUp from "./pages/SignUp.jsx";
 
 // Add this to the top of your API service file or in your main component
 console.log('=== ENVIRONMENT DEBUG ===');
@@ -42,6 +43,7 @@ function App() {
                 <Route path="/events" element={<Events />} />
                 <Route path="/event/:eventSlug" element={<EventDetail />} />
                 <Route path="/signin" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
 
                 {/* Protected routes */}
                 <Route path="/admin" element={
