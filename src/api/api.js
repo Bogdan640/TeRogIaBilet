@@ -1,5 +1,10 @@
-// Base API URL - use environment variable for production or fallback to localhost for development
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// Fixed API URL configuration
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_URL = `${BASE_URL}/api`;
+
+// Add debugging to see what URL is being used
+console.log('Environment VITE_API_URL:', import.meta.env.VITE_API_URL);
+console.log('Final API_URL:', API_URL);
 
 // Get authentication headers
 const getAuthHeaders = () => {
@@ -32,6 +37,8 @@ export const concertService = {
         const queryString = params.toString();
         const url = `${API_URL}/concerts${queryString ? `?${queryString}` : ''}`;
 
+        console.log('Making request to:', url); // Debug log
+
         const response = await fetch(url, {
             headers: getAuthHeaders()
         });
@@ -40,7 +47,10 @@ export const concertService = {
 
     // Get concert by ID
     getById: async (id) => {
-        const response = await fetch(`${API_URL}/concerts/${id}`, {
+        const url = `${API_URL}/concerts/${id}`;
+        console.log('Making request to:', url); // Debug log
+
+        const response = await fetch(url, {
             headers: getAuthHeaders()
         });
         return handleResponse(response);
