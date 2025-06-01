@@ -7,6 +7,8 @@ import './App.css';
 import MainPage from '../src/pages/MainPage.jsx';
 import SignIn from "./pages/SignIn.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import TwoFactorSetup from "./components/TwoFactorSetup.jsx";
 
 // Add this to the top of your API service file or in your main component
 console.log('=== ENVIRONMENT DEBUG ===');
