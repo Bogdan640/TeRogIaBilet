@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from "react-router-dom";
-import 'D:\\School\\2ndY_S2\\MPP\\battlepass\\src\\styles\\MainPage.css';
+import '../styles/MainPage.css';
 import '../components/ButtonMainPageStyle.css'
 import images from '../assets/MainPageImages/images.jpeg';
 import last from '../assets/MainPageImages/last.webp';
