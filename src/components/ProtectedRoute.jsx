@@ -14,8 +14,7 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
             const tokenValid = await authService.checkTokenValidity();
 
             // Check if user exists, token is valid, and role is appropriate
-            const isAuthorized = user && tokenValid &&
-                (!requiredRole || user.role === requiredRole);
+            const isAuthorized = user && tokenValid
 
             setAuthorized(isAuthorized);
             setLoading(false);

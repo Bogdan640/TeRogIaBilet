@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/SignIn.css';
 import { authService } from '../api/authService';
+import { API_URL } from '../api/api';
 
 function SignIn() {
     const [email, setEmail] = useState('');
