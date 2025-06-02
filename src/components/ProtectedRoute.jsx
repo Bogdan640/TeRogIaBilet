@@ -1,11 +1,12 @@
 // src/components/ProtectedRoute.jsx
 import React, { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { authService } from '../api/authService';
 
 const ProtectedRoute = ({ children, requiredRole = null }) => {
     const [loading, setLoading] = useState(true);
     const [authorized, setAuthorized] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -18,14 +19,32 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
 
             setAuthorized(isAuthorized);
             setLoading(false);
+
+            // If not authorized, redirect immediately
+            if (!isAuthorized && !loading) {
+                navigate('/');
+            }
         };
 
         checkAuth();
-    }, [requiredRole]);
+
+        // Set up periodic token checking
+        const tokenCheckInterval = setInterval(async () => {
+            const tokenValid = await authService.checkTokenValidity();
+            if (!tokenValid) {
+                // Token expired, log out and redirect
+                authService.logout();
+                navigate('/');
+            }
+        }, 5000); // Check every 5 seconds
+
+        return () => clearInterval(tokenCheckInterval);
+    }, [requiredRole, navigate]);
 
     if (loading) return <div>Loading...</div>;
 
-    return authorized ? children : <Navigate to="/signin" />;
+    // This return handles the initial check
+    return authorized ? children : <Navigate to="/" />;
 };
 
 export default ProtectedRoute;

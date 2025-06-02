@@ -81,7 +81,7 @@ function SignIn() {
             if (data.user && data.user.role === 'admin') {
                 navigate('/admin');
             } else {
-                navigate('/events');
+                navigate('/admin');
             }
         } catch (err) {
             setError('Verification failed');
