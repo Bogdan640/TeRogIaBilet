@@ -31,7 +31,7 @@ function SignUp() {
 
             if (response.user && response.token) {
                 // Navigate based on role, assuming default role is 'user'
-                navigate('/events');
+                navigate('/admin');
             }
         } catch (err) {
             setError(err.message || 'Registration failed');
