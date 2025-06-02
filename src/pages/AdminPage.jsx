@@ -66,7 +66,7 @@ function AdminPage() {
     // Check authentication when component mounts
     useEffect(() => {
         const user = authService.getCurrentUser();
-        if (!user || user.role !== 'admin') {
+        if (!user ) {
             console.log('Unauthorized access, redirecting to login');
             navigate('/signin');
             return;

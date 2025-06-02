@@ -37,11 +37,7 @@ function SignIn() {
             }
 
             // Regular login success
-            if (response.user && response.user.role === 'admin') {
-                navigate('/admin');
-            } else {
-                navigate('/admin');
-            }
+            navigate('/admin');
         } catch (err) {
             setError(err.message || 'Invalid email or password');
             setLoading(false);
@@ -79,11 +75,7 @@ function SignIn() {
             localStorage.setItem('user', JSON.stringify(data.user));
 
             // Navigate based on role
-            if (data.user && data.user.role === 'admin') {
-                navigate('/admin');
-            } else {
-                navigate('/admin');
-            }
+            navigate('/admin');
         } catch (err) {
             setError('Verification failed');
             setLoading(false);
