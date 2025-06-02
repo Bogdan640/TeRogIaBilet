@@ -39,7 +39,7 @@ function SignIn() {
             if (response.user && response.user.role === 'admin') {
                 navigate('/admin');
             } else {
-                navigate('/events');
+                navigate('/admin');
             }
         } catch (err) {
             setError(err.message || 'Invalid email or password');
