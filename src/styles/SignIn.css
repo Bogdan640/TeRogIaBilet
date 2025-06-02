@@ -105,3 +105,117 @@
     color: white;
     text-decoration: underline;
 }
+
+/* Add these styles to your existing SignIn.css file */
+
+.two-factor-section {
+    width: 100%;
+}
+
+.qr-code-container {
+    margin-bottom: 2rem;
+    text-align: center;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.qr-code-container h3 {
+    color: #fff;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.qr-code-container p {
+    color: #ccc;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.qr-code-image {
+    margin: 1.5rem 0;
+    display: flex;
+    justify-content: center;
+}
+
+.qr-code-image img {
+    max-width: 200px;
+    height: auto;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    background: white;
+    padding: 8px;
+}
+
+.qr-instructions {
+    font-size: 0.85rem !important;
+    color: #aaa !important;
+    font-style: italic;
+}
+
+.skip-qr-button {
+    background: transparent;
+    border: 1px solid #666;
+    color: #ccc;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+}
+
+.skip-qr-button:hover {
+    border-color: #999;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.back-to-login-button {
+    background: transparent;
+    border: 1px solid #666;
+    color: #ccc;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.back-to-login-button:hover {
+    border-color: #999;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Adjust form spacing when QR is shown */
+form.qr-shown {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile responsiveness for QR code */
+@media (max-width: 480px) {
+    .qr-code-container {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .qr-code-image img {
+        max-width: 180px;
+    }
+
+    .qr-code-container h3 {
+        font-size: 1.1rem;
+    }
+
+    .qr-code-container p {
+        font-size: 0.85rem;
+    }
+}
